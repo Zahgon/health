@@ -2,11 +2,12 @@ package main
 
 import (
 	"context"
-	"github.com/alexliesenfeld/health"
-	"github.com/heptiolabs/healthcheck"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/alexliesenfeld/health"
+	"github.com/heptiolabs/healthcheck"
 )
 
 func main() {

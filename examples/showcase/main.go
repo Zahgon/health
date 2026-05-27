@@ -2,15 +2,13 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"math/rand"
+	"net/http"
+	"time"
+
 	"github.com/alexliesenfeld/health"
 	"github.com/alexliesenfeld/health/interceptors"
 	"github.com/alexliesenfeld/health/middleware"
-	"log"
-	"math/rand"
-	"net/http"
-	"sync/atomic"
-	"time"
 )
 
 // This example shows all core features of this library. Please note that this example is not to show how a
@@ -138,20 +136,15 @@ func main() {
 }
 
 func onComponentStatusChanged(_ context.Context, name string, state health.CheckState) {
-	log.Println(fmt.Sprintf("component %s changed status to %s", name, state.Status))
+	_ = "STUB: not implemented"
+	return
 }
 
 func onSystemStatusChanged(_ context.Context, state health.CheckerState) {
-	log.Println(fmt.Sprintf("system status changed to %s", state.Status))
+	_ = "STUB: not implemented"
+	return
 }
 
-func volatileFunc() func(ctx context.Context) error {
-	var count uint32
-	return func(ctx context.Context) error {
-		defer atomic.AddUint32(&count, 1)
-		if count%2 == 0 {
-			return fmt.Errorf("this is a check error") // example error
-		}
-		return nil
-	}
-}
+func volatileFunc() func(ctx context.Context) error { _ = "STUB: not implemented"; return nil }
+
+// example error

@@ -4,11 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/alexliesenfeld/health"
-	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/alexliesenfeld/health"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 // This is an example configuration that shows how Kubernetes liveness and readiness checks can be created with this

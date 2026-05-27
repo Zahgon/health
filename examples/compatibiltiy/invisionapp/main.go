@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
-	"github.com/InVisionApp/go-health/checkers"
-	"github.com/alexliesenfeld/health"
 	"log"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/InVisionApp/go-health/checkers"
+	"github.com/alexliesenfeld/health"
 )
 
 func main() {

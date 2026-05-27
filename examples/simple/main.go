@@ -4,11 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/alexliesenfeld/health"
-	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/alexliesenfeld/health"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 // This is a very simple example that shows the basic features of this library.

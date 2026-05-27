@@ -1,8 +1,6 @@
 package health
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
 )
 
@@ -48,74 +46,42 @@ type (
 
 // Write implements ResultWriter.Write.
 func (rw *JSONResultWriter) Write(result *CheckerResult, statusCode int, w http.ResponseWriter, r *http.Request) error {
-	jsonResp, err := json.Marshal(result)
-	if err != nil {
-		return fmt.Errorf("cannot marshal response: %w", err)
-	}
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(statusCode)
-	_, err = w.Write(jsonResp)
-	return err
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // NewJSONResultWriter creates a new instance of a JSONResultWriter.
-func NewJSONResultWriter() *JSONResultWriter {
-	return &JSONResultWriter{}
-}
+func NewJSONResultWriter() *JSONResultWriter { _ = "STUB: not implemented"; return nil }
 
 // NewHandler creates a new health check http.Handler.
 func NewHandler(checker Checker, options ...HandlerOption) http.HandlerFunc {
-	cfg := createConfig(options)
-	return func(w http.ResponseWriter, r *http.Request) {
-		// Do the check (with configured middleware)
-		result := withMiddleware(cfg.middleware, func(r *http.Request) CheckerResult {
-			return checker.Check(r.Context())
-		})(r)
-
-		// Write HTTP response
-		disableResponseCache(w)
-		statusCode := mapHTTPStatusCode(result.Status, cfg.statusCodeUp, cfg.statusCodeDown)
-		//nolint:errcheck
-		cfg.resultWriter.Write(&result, statusCode, w, r)
-	}
+	_ = "STUB: not implemented"
+	return *new(http.HandlerFunc)
 }
 
+// Do the check (with configured middleware)
+
+// Write HTTP response
+
+//nolint:errcheck
+
 func disableResponseCache(w http.ResponseWriter) {
+	_ = "STUB: not implemented"
 	// Avoid caching: https://www.ibm.com/garage/method/practices/manage/health-check-apis/
-	w.Header().Set("Cache-Control", "no-cache")
-	w.Header().Set("Pragma", "no-cache")
-	w.Header().Set("Expires", "Thu, 01 Jan 1970 00:00:00 GMT")
+	return
 }
 
 func mapHTTPStatusCode(status AvailabilityStatus, statusCodeUp int, statusCodeDown int) int {
-	if status == StatusDown || status == StatusUnknown {
-		return statusCodeDown
-	}
-	return statusCodeUp
+	_ = "STUB: not implemented"
+	return 0
 }
 
 func createConfig(options []HandlerOption) HandlerConfig {
-	cfg := HandlerConfig{
-		statusCodeDown: http.StatusServiceUnavailable,
-		statusCodeUp:   http.StatusOK,
-		middleware:     []Middleware{},
-	}
-
-	for _, opt := range options {
-		opt(&cfg)
-	}
-
-	if cfg.resultWriter == nil {
-		cfg.resultWriter = &JSONResultWriter{}
-	}
-
-	return cfg
+	_ = "STUB: not implemented"
+	return *new(HandlerConfig)
 }
 
 func withMiddleware(interceptors []Middleware, target MiddlewareFunc) MiddlewareFunc {
-	chain := target
-	for idx := len(interceptors) - 1; idx >= 0; idx-- {
-		chain = interceptors[idx](chain)
-	}
-	return chain
+	_ = "STUB: not implemented"
+	return *new(MiddlewareFunc)
 }

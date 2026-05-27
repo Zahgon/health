@@ -2,9 +2,7 @@ package health
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
-	"fmt"
 	"sync"
 	"time"
 )
@@ -152,296 +150,107 @@ const (
 )
 
 // MarshalJSON provides a custom marshaller for the CheckResult type.
-func (cr CheckResult) MarshalJSON() ([]byte, error) {
-	errorMsg := ""
-	if cr.Error != nil {
-		errorMsg = cr.Error.Error()
-	}
+func (cr CheckResult) MarshalJSON() ([]byte, error) { _ = "STUB: not implemented"; return nil, nil }
 
-	return json.Marshal(&jsonCheckResult{
-		Status:    string(cr.Status),
-		Timestamp: cr.Timestamp,
-		Error:     errorMsg,
-	})
-}
+func (cr *CheckResult) UnmarshalJSON(data []byte) error { _ = "STUB: not implemented"; return nil }
 
-func (cr *CheckResult) UnmarshalJSON(data []byte) error {
-	var result jsonCheckResult
-	if err := json.Unmarshal(data, &result); err != nil {
-		return err
-	}
-
-	cr.Status = AvailabilityStatus(result.Status)
-	cr.Timestamp = result.Timestamp
-
-	if result.Error != "" {
-		cr.Error = errors.New(result.Error)
-	}
-
-	return nil
-}
-
-func (s AvailabilityStatus) criticality() int {
-	switch s {
-	case StatusDown:
-		return 2
-	case StatusUnknown:
-		return 1
-	default:
-		return 0
-	}
-}
+func (s AvailabilityStatus) criticality() int { _ = "STUB: not implemented"; return 0 }
 
 var (
 	CheckTimeoutErr = errors.New("check timed out")
 )
 
-func newChecker(cfg checkerConfig) *defaultChecker {
-	checkState := map[string]CheckState{}
-	for _, check := range cfg.checks {
-		checkState[check.Name] = CheckState{Status: StatusUnknown}
-	}
-
-	checker := defaultChecker{
-		cfg:   cfg,
-		state: CheckerState{Status: StatusUnknown, CheckState: checkState},
-	}
-
-	if !cfg.autostartDisabled {
-		checker.Start()
-	}
-
-	return &checker
-}
+func newChecker(cfg checkerConfig) *defaultChecker { _ = "STUB: not implemented"; return nil }
 
 // Start implements Checker.Start. Please refer to Checker.Start for more information.
-func (ck *defaultChecker) Start() {
-	ck.mtx.Lock()
+func (ck *defaultChecker) Start() { _ = "STUB: not implemented"; return }
 
-	if !ck.started {
-		ctx, cancel := context.WithCancel(context.Background())
-		ck.cancel = cancel
+// We run the initial check execution in a separate goroutine so that server startup is not blocked in case of
+// a bad check that runs for a longer period of time.
 
-		ck.started = true
-		defer ck.startPeriodicChecks(ctx)
-
-		// We run the initial check execution in a separate goroutine so that server startup is not blocked in case of
-		// a bad check that runs for a longer period of time.
-		go ck.Check(ctx)
-	}
-
-	// Attention: We should avoid having this unlock as a deferred function call right after the mutex lock above,
-	// since this may cause a deadlock (e.g., startPeriodicChecks requires the mutex lock as well and would block
-	// because of the defer order)
-	ck.mtx.Unlock()
-}
+// Attention: We should avoid having this unlock as a deferred function call right after the mutex lock above,
+// since this may cause a deadlock (e.g., startPeriodicChecks requires the mutex lock as well and would block
+// because of the defer order)
 
 // Stop implements Checker.Stop. Please refer to Checker.Stop for more information.
-func (ck *defaultChecker) Stop() {
-	ck.cancel()
-	ck.wg.Wait()
-
-	ck.mtx.Lock()
-	defer ck.mtx.Unlock()
-
-	ck.started = false
-	ck.periodicCheckCount = 0
-}
+func (ck *defaultChecker) Stop() { _ = "STUB: not implemented"; return }
 
 // GetRunningPeriodicCheckCount implements Checker.GetRunningPeriodicCheckCount.
 // Please refer to Checker.GetRunningPeriodicCheckCount for more information.
-func (ck *defaultChecker) GetRunningPeriodicCheckCount() int {
-	ck.mtx.Lock()
-	defer ck.mtx.Unlock()
-	return ck.periodicCheckCount
-}
+func (ck *defaultChecker) GetRunningPeriodicCheckCount() int { _ = "STUB: not implemented"; return 0 }
 
 // IsStarted implements Checker.IsStarted. Please refer to Checker.IsStarted for more information.
-func (ck *defaultChecker) IsStarted() bool {
-	ck.mtx.Lock()
-	defer ck.mtx.Unlock()
-	return ck.started
-}
+func (ck *defaultChecker) IsStarted() bool { _ = "STUB: not implemented"; return false }
 
 // Check implements Checker.Check. Please refer to Checker.Check for more information.
 func (ck *defaultChecker) Check(ctx context.Context) CheckerResult {
-	ck.mtx.Lock()
-	defer ck.mtx.Unlock()
-
-	ctx, cancel := context.WithTimeout(ctx, ck.cfg.timeout)
-	defer cancel()
-
-	ck.runSynchronousChecks(ctx)
-
-	return ck.mapStateToCheckerResult()
+	_ = "STUB: not implemented"
+	return *new(CheckerResult)
 }
 
 func (ck *defaultChecker) runSynchronousChecks(ctx context.Context) {
-	var (
-		numChecks          = len(ck.cfg.checks)
-		numInitiatedChecks = 0
-		resChan            = make(chan checkResult, numChecks)
-	)
-
-	for _, check := range ck.cfg.checks {
-		check := check
-
-		if !isPeriodicCheck(check) {
-			checkState := ck.state.CheckState[check.Name]
-
-			if !isCacheExpired(ck.cfg.cacheTTL, &checkState) {
-				continue
-			}
-
-			numInitiatedChecks++
-
-			go func() {
-				withCheckContext(ctx, check, func(ctx context.Context) {
-					_, checkState := executeCheck(ctx, &ck.cfg, check, checkState)
-					resChan <- checkResult{check.Name, checkState}
-				})
-			}()
-		}
-	}
-
-	results := make([]checkResult, 0, numInitiatedChecks)
-	for len(results) < numInitiatedChecks {
-		results = append(results, <-resChan)
-	}
-
-	ck.updateState(ctx, results...)
+	_ = "STUB: not implemented"
+	return
 }
 
 func (ck *defaultChecker) startPeriodicChecks(ctx context.Context) {
-	ck.mtx.Lock()
-	defer ck.mtx.Unlock()
-
-	// Start periodic checks.
-	for _, check := range ck.cfg.checks {
-		check := check
-
-		if isPeriodicCheck(check) {
-			// ATTENTION: Access to check and ck.state.CheckState is not synchronized here,
-			// 	assuming that the accessed values are never changed, such as
-			//  - ck.state.CheckState[check.Name]
-			//  - check object itself (there will never be a new Check object created for the configured check)
-			//	- check.updateInterval (used by isPeriodicCheck)
-			//  - check.initialDelay
-			// ALSO:
-			//  - The check state itself is never synchronized on, since the only place where values can be changed are
-			//    within this goroutine.
-
-			ck.periodicCheckCount++
-			ck.wg.Add(1)
-
-			go func() {
-				defer ck.wg.Done()
-
-				if check.initialDelay > 0 {
-					if waitForStopSignal(ctx, check.initialDelay) {
-						return
-					}
-				}
-
-				for {
-					withCheckContext(ctx, check, func(ctx context.Context) {
-						ck.mtx.Lock()
-						checkState := ck.state.CheckState[check.Name]
-						ck.mtx.Unlock()
-
-						// ATTENTION: This function may panic, if panic handling is disabled
-						// 	via "check.DisablePanicRecovery".
-						//
-						// ATTENTION: executeCheck is executed with its own copy of the checks
-						// 	state (see checkState above). This means that if there is a global status
-						//	listener that is configured by the user with health.WithStatusListener,
-						//	and that global status listener changes this checks state as long as
-						//  executeCheck is running, the modifications made by the global listener
-						//  will be lost after the function completes, since we overwrite the state
-						//  below using updateState.
-						//  This means that global listeners should not change the checks state
-						//  or accept losing their updates. This will be the case especially for
-						//  long-running checks. Hence, the checkState is read-only for interceptors.
-						ctx, checkState = executeCheck(ctx, &ck.cfg, check, checkState)
-
-						ck.mtx.Lock()
-						ck.updateState(ctx, checkResult{check.Name, checkState})
-						ck.mtx.Unlock()
-					})
-
-					if waitForStopSignal(ctx, check.updateInterval) {
-						return
-					}
-				}
-			}()
-		}
-	}
+	_ = "STUB: not implemented"
+	return
 }
 
+// Start periodic checks.
+
+// ATTENTION: Access to check and ck.state.CheckState is not synchronized here,
+// 	assuming that the accessed values are never changed, such as
+//  - ck.state.CheckState[check.Name]
+//  - check object itself (there will never be a new Check object created for the configured check)
+//	- check.updateInterval (used by isPeriodicCheck)
+//  - check.initialDelay
+// ALSO:
+//  - The check state itself is never synchronized on, since the only place where values can be changed are
+//    within this goroutine.
+
+// ATTENTION: This function may panic, if panic handling is disabled
+// 	via "check.DisablePanicRecovery".
+//
+// ATTENTION: executeCheck is executed with its own copy of the checks
+// 	state (see checkState above). This means that if there is a global status
+//	listener that is configured by the user with health.WithStatusListener,
+//	and that global status listener changes this checks state as long as
+//  executeCheck is running, the modifications made by the global listener
+//  will be lost after the function completes, since we overwrite the state
+//  below using updateState.
+//  This means that global listeners should not change the checks state
+//  or accept losing their updates. This will be the case especially for
+//  long-running checks. Hence, the checkState is read-only for interceptors.
+
 func (ck *defaultChecker) updateState(ctx context.Context, updates ...checkResult) {
-	for _, update := range updates {
-		ck.state.CheckState[update.checkName] = update.newState
-	}
-
-	oldStatus := ck.state.Status
-	ck.state.Status = aggregateStatus(ck.state.CheckState)
-
-	if oldStatus != ck.state.Status && ck.cfg.statusChangeListener != nil {
-		ck.cfg.statusChangeListener(ctx, ck.state)
-	}
+	_ = "STUB: not implemented"
+	return
 }
 
 func (ck *defaultChecker) mapStateToCheckerResult() CheckerResult {
-	var (
-		checkResults map[string]CheckResult
-		numChecks    = len(ck.cfg.checks)
-		status       = ck.state.Status
-	)
-
-	if numChecks > 0 && !ck.cfg.detailsDisabled {
-		checkResults = make(map[string]CheckResult, numChecks)
-		for _, check := range ck.cfg.checks {
-			checkState := ck.state.CheckState[check.Name]
-			checkResults[check.Name] = CheckResult{
-				Status:    checkState.Status,
-				Error:     checkState.Result,
-				Timestamp: checkState.LastCheckedAt,
-			}
-		}
-	}
-
-	return CheckerResult{Status: status, Details: checkResults, Info: createInfoMap(ck.cfg.info, ck.cfg.infoFuncs)}
+	_ = "STUB: not implemented"
+	return *new(CheckerResult)
 }
 
 func isCacheExpired(cacheDuration time.Duration, state *CheckState) bool {
-	return state.LastCheckedAt.IsZero() || state.LastCheckedAt.Before(time.Now().Add(-cacheDuration))
+	_ = "STUB: not implemented"
+	return false
 }
 
-func isPeriodicCheck(check *Check) bool {
-	return check.updateInterval > 0
-}
+func isPeriodicCheck(check *Check) bool { _ = "STUB: not implemented"; return false }
 
 func waitForStopSignal(ctx context.Context, waitTime time.Duration) bool {
+	_ = "STUB: not implemented"
 	// We can switch to using time.After should this library only support Go version >= 1.23 in the future.
 	// Meanwhile, we use time.NewTimer (see https://github.com/alexliesenfeld/health/issues/91).
-	timer := time.NewTimer(waitTime)
-	defer timer.Stop()
-
-	select {
-	case <-timer.C:
-		return false
-	case <-ctx.Done():
-		return true
-	}
+	return false
 }
 
 func withCheckContext(ctx context.Context, check *Check, f func(checkCtx context.Context)) {
-	cancel := func() {}
-	if check.Timeout > 0 {
-		ctx, cancel = context.WithTimeout(ctx, check.Timeout)
-	}
-	defer cancel()
-	f(ctx)
+	_ = "STUB: not implemented"
+	return
 }
 
 func executeCheck(
@@ -450,148 +259,51 @@ func executeCheck(
 	check *Check,
 	oldState CheckState,
 ) (context.Context, CheckState) {
-	newState := oldState
-
-	if newState.FirstCheckStartedAt.IsZero() {
-		newState.FirstCheckStartedAt = time.Now().UTC()
-	}
-
-	// We copy explicitly to not affect the underlying array of the slices as a side effect.
-	// These slices are being passed to this library as configuration parameters, so we don't know how they
-	// are being used otherwise in the users program.
-	interceptors := make([]Interceptor, 0, len(cfg.interceptors)+len(check.Interceptors))
-	interceptors = append(interceptors, cfg.interceptors...)
-	interceptors = append(interceptors, check.Interceptors...)
-
-	newState = withInterceptors(interceptors, func(ctx context.Context, _ string, state CheckState) CheckState {
-		checkFuncResult := executeCheckFunc(ctx, check)
-		return createNextCheckState(checkFuncResult, check, state)
-	})(ctx, check.Name, newState)
-
-	if check.StatusListener != nil && oldState.Status != newState.Status {
-		check.StatusListener(ctx, check.Name, newState)
-	}
-
-	return ctx, newState
+	_ = "STUB: not implemented"
+	return *new(context.Context), *new(CheckState)
 }
+
+// We copy explicitly to not affect the underlying array of the slices as a side effect.
+// These slices are being passed to this library as configuration parameters, so we don't know how they
+// are being used otherwise in the users program.
 
 func executeCheckFunc(ctx context.Context, check *Check) error {
+	_ = "STUB: not implemented"
 	// If this channel is not bounded, we may have a goroutine leak (e.g., when ctx.Done signals first then
 	// sending the check result into the channel will block forever).
-	res := make(chan error, 1)
-
-	go func() {
-		defer func() {
-			if !check.DisablePanicRecovery {
-				if r := recover(); r != nil {
-					// TODO: Provide a configurable panic handler configuration option, so developers can decide
-					// 	what to do with panics.
-					err, ok := r.(error)
-					if ok {
-						res <- err
-					} else {
-						res <- fmt.Errorf("%v", r)
-					}
-				}
-			}
-		}()
-
-		res <- check.Check(ctx)
-	}()
-
-	select {
-	case err := <-res:
-		return err
-	case <-ctx.Done():
-		return CheckTimeoutErr
-	}
+	return nil
 }
 
+// TODO: Provide a configurable panic handler configuration option, so developers can decide
+// 	what to do with panics.
+
 func createNextCheckState(result error, check *Check, state CheckState) CheckState {
-	now := time.Now().UTC()
-
-	state.Result = result
-	state.LastCheckedAt = now
-
-	if state.Result == nil {
-		state.ContiguousFails = 0
-		state.LastSuccessAt = now
-	} else {
-		state.ContiguousFails++
-		state.LastFailureAt = now
-	}
-
-	state.Status = evaluateCheckStatus(&state, check.MaxTimeInError, check.MaxContiguousFails)
-
-	return state
+	_ = "STUB: not implemented"
+	return *new(CheckState)
 }
 
 func evaluateCheckStatus(state *CheckState, maxTimeInError time.Duration, maxFails uint) AvailabilityStatus {
-	if state.LastCheckedAt.IsZero() {
-		return StatusUnknown
-	} else if state.Result != nil {
-		maxTimeInErrorSinceStartPassed := !state.FirstCheckStartedAt.Add(maxTimeInError).After(time.Now())
-		maxTimeInErrorSinceLastSuccessPassed := state.LastSuccessAt.IsZero() ||
-			!state.LastSuccessAt.Add(maxTimeInError).After(time.Now())
-
-		timeInErrorThresholdCrossed := maxTimeInErrorSinceStartPassed && maxTimeInErrorSinceLastSuccessPassed
-		failCountThresholdCrossed := state.ContiguousFails >= maxFails
-
-		if failCountThresholdCrossed && timeInErrorThresholdCrossed {
-			return StatusDown
-		}
-	}
-
-	return StatusUp
+	_ = "STUB: not implemented"
+	return *new(AvailabilityStatus)
 }
 
 func aggregateStatus(results map[string]CheckState) AvailabilityStatus {
-	status := StatusUp
-
-	for _, result := range results {
-		if result.Status.criticality() > status.criticality() {
-			status = result.Status
-		}
-	}
-
-	return status
+	_ = "STUB: not implemented"
+	return *new(AvailabilityStatus)
 }
 
 func withInterceptors(interceptors []Interceptor, target InterceptorFunc) InterceptorFunc {
-	chain := target
-
-	for idx := len(interceptors) - 1; idx >= 0; idx-- {
-		chain = interceptors[idx](chain)
-	}
-
-	return chain
+	_ = "STUB: not implemented"
+	return *new(InterceptorFunc)
 }
 
 func createInfoMap(infoMap map[string]interface{}, infoFuncs []func(map[string]interface{})) map[string]interface{} {
+	_ = "STUB: not implemented"
 	// TODO: This solution may often create a new map and hence unnecessarily use the heap
 	// 	(the map we return will escape to the heap during escape analysis because the
 	//  size is unknown at compile time). This may be improved by using a check specific
 	//  map that is recycled, so that allocated heap is not wasted and may be reused
 	//  from check execution to check execution (e.g., by cleaning it up after
 	//  the execution using delete(checkSpecificMap, key).
-
-	if len(infoFuncs) == 0 {
-		return infoMap
-	}
-
-	var target map[string]interface{}
-
-	if len(infoMap) > 0 {
-		target = make(map[string]interface{})
-
-		for _, infoFunc := range infoFuncs {
-			infoFunc(target)
-		}
-
-		for k, v := range infoMap {
-			target[k] = v
-		}
-	}
-
-	return target
+	return nil
 }

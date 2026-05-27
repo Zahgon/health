@@ -2,12 +2,10 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"github.com/alexliesenfeld/health"
-	"log"
 	"net/http"
-	"sync/atomic"
 	"time"
+
+	"github.com/alexliesenfeld/health"
 )
 
 // This example shows how this library can be used to listen for health status changes.
@@ -56,20 +54,15 @@ func main() {
 }
 
 func onComponentStatusChanged(_ context.Context, name string, state health.CheckState) {
-	log.Println(fmt.Sprintf("component %s changed status to %s", name, state.Status))
+	_ = "STUB: not implemented"
+	return
 }
 
 func onSystemStatusChanged(_ context.Context, state health.CheckerState) {
-	log.Println(fmt.Sprintf("system status changed to %s", state.Status))
+	_ = "STUB: not implemented"
+	return
 }
 
-func volatileFunc() func(ctx context.Context) error {
-	var count uint32
-	return func(ctx context.Context) error {
-		defer atomic.AddUint32(&count, 1)
-		if count%2 == 0 {
-			return fmt.Errorf("this is a check error") // example error
-		}
-		return nil
-	}
-}
+func volatileFunc() func(ctx context.Context) error { _ = "STUB: not implemented"; return nil }
+
+// example error

@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/alexliesenfeld/health"
-	"github.com/etherlabsio/healthcheck/v2/checkers"
 	"log"
 	"net/http"
+
+	"github.com/alexliesenfeld/health"
+	"github.com/etherlabsio/healthcheck/v2/checkers"
 )
 
 func main() {

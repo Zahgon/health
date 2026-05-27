@@ -1,8 +1,9 @@
 package middleware
 
 import (
-	"github.com/alexliesenfeld/health"
 	"net/http"
+
+	"github.com/alexliesenfeld/health"
 )
 
 // BasicAuth is a middleware that removes check details (such as service names, error messages, etc.) from the
@@ -17,10 +18,8 @@ import (
 // Handler (e.g., https://github.com/99designs/basicauth-go). This libraries middleware (health.Middleware)
 // is only for pre- and post-processing results but not to deal with the HTTP request and response objects.
 func BasicAuth(username, password string) health.Middleware {
-	return CustomAuth(func(r *http.Request) bool {
-		reqUser, reqPassword, ok := r.BasicAuth()
-		return ok && username == reqUser && password == reqPassword
-	})
+	_ = "STUB: not implemented"
+	return *new(health.Middleware)
 }
 
 // CustomAuth is a middleware that removes check details (such as service names, error messages, etc.) from the
@@ -35,14 +34,6 @@ func BasicAuth(username, password string) health.Middleware {
 // Handler (e.g., https://github.com/99designs/basicauth-go). This libraries middleware (health.Middleware)
 // is only for pre- and post-processing results but not to deal with the HTTP request and response objects.
 func CustomAuth(authFunc func(r *http.Request) bool) health.Middleware {
-	return func(next health.MiddlewareFunc) health.MiddlewareFunc {
-		return func(r *http.Request) health.CheckerResult {
-			authSuccess := authFunc(r)
-			result := next(r)
-			if !authSuccess {
-				result.Details = nil
-			}
-			return result
-		}
-	}
+	_ = "STUB: not implemented"
+	return *new(health.Middleware)
 }

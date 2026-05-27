@@ -3,11 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/alexliesenfeld/health"
-	"github.com/google/uuid"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 	"time"
+
+	"github.com/alexliesenfeld/health"
+	log "github.com/sirupsen/logrus"
 )
 
 // This example shows how to add check interceptors and handler middleware for pre- and post-processing.
@@ -37,56 +37,28 @@ func main() {
 }
 
 func createCheckLogger(next health.InterceptorFunc) health.InterceptorFunc {
-	return func(ctx context.Context, name string, state health.CheckState) health.CheckState {
-		logger := getLogger(ctx)
-		if logger == nil {
-			logger = log.NewEntry(log.New())
-		}
-		logger = logger.WithFields(log.Fields{"name": name})
-		ctx = setLogger(ctx, logger)
-		return next(ctx, name, state)
-	}
+	_ = "STUB: not implemented"
+	return *new(health.InterceptorFunc)
 }
 
 func logCheck(next health.InterceptorFunc) health.InterceptorFunc {
-	return func(ctx context.Context, name string, state health.CheckState) health.CheckState {
-		logger := getLogger(ctx)
-		logger.Infof("starting component check")
-		res := next(ctx, name, state)
-		logger.Infof("component check finished")
-		return res
-	}
+	_ = "STUB: not implemented"
+	return *new(health.InterceptorFunc)
 }
 
 func createRequestLogger(next health.MiddlewareFunc) health.MiddlewareFunc {
-	return func(r *http.Request) health.CheckerResult {
-		logger := getLogger(r.Context())
-		if logger == nil {
-			logger = log.WithFields(log.Fields{"request": uuid.New()})
-		}
-		ctx := setLogger(r.Context(), logger)
-		return next(r.WithContext(ctx))
-	}
+	_ = "STUB: not implemented"
+	return *new(health.MiddlewareFunc)
 }
 
 func logRequest(next health.MiddlewareFunc) health.MiddlewareFunc {
-	return func(r *http.Request) health.CheckerResult {
-		logger := getLogger(r.Context())
-		logger.Infof("starting to process health check request")
-		res := next(r)
-		logger.Infof("finished processing of health check request")
-		return res
-	}
+	_ = "STUB: not implemented"
+	return *new(health.MiddlewareFunc)
 }
 
 func setLogger(ctx context.Context, logger *log.Entry) context.Context {
-	return context.WithValue(ctx, "logger", logger)
+	_ = "STUB: not implemented"
+	return *new(context.Context)
 }
 
-func getLogger(ctx context.Context) *log.Entry {
-	logger, ok := ctx.Value("logger").(*log.Entry)
-	if ok {
-		return logger
-	}
-	return nil
-}
+func getLogger(ctx context.Context) *log.Entry { _ = "STUB: not implemented"; return nil }

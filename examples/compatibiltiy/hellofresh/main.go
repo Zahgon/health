@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/alexliesenfeld/health"
-	httpCheck "github.com/hellofresh/health-go/v4/checks/http"
 	"log"
 	"net/http"
+
+	"github.com/alexliesenfeld/health"
+	httpCheck "github.com/hellofresh/health-go/v4/checks/http"
 )
 
 func main() {
